@@ -1,6 +1,7 @@
 module Cards (Deck, Card(..), Suit(..), Face(..), deck)
   where
 
+import Data.Function
 import Data.List
 import Data.Ord
 import Control.Applicative
@@ -18,7 +19,7 @@ data Face = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten
           deriving (Eq, Ord, Enum, Bounded)
 
 instance Ord Card where
-  compare a b = compare (face a) (face b)
+  compare = on compare face
 
 instance Show Card where
   show (Card s f) = show f ++ [head $ show s]

@@ -2,6 +2,7 @@ module Poker
   where
 
 import Cards
+import Data.Function
 import Data.List
 import Data.Maybe
 import Control.Applicative
@@ -56,6 +57,12 @@ matches h = concat $
     maybeToList . flush,
     maybeToList . straightFlush
   ] <*> [h]
+
+bestHandCategory :: Hand -> HandCategory
+bestHandCategory = maximum . matches
+
+winningHand :: [Hand] -> (Hand, HandCategory)
+winningHand = maximumBy (on compare snd) . map (\h -> (h, bestHandCategory h))
 
 -- Sample hands
 
