@@ -4,14 +4,17 @@ module Poker
 import Cards
 import Data.Function
 import Data.List
+import Data.Tuple.Curry
 import Data.Maybe
 import Control.Applicative
 import Control.Arrow
 
 type Hand = (Card, Card, Card, Card, Card)
 
-data HandCategory = HighCard Face
-                  | OnePair Face
+type Kicker = Face
+
+data HandCategory = HighCard Kicker Kicker Kicker Kicker Kicker
+                  | OnePair Face Kicker Kicker Kicker
                   | TwoPair Face Face
                   | ThreeOfAKind Face
                   | Straight Face
@@ -24,10 +27,10 @@ data HandCategory = HighCard Face
 -- Hand category detection
 
 highCard :: Hand -> HandCategory
-highCard = HighCard . highFace
+highCard = uncurryN HighCard . tuplify5 . reverse . highFaces
 
 onePair :: Hand -> [HandCategory]
-onePair = map OnePair . pairs
+onePair = map (uncurryN OnePair) . pairsWithKickers
 
 twoPair :: Hand -> [HandCategory]
 twoPair = map pairToTwoPair . doublePairs
@@ -72,11 +75,20 @@ s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six),
 
 -- Util
 
+tuplify5 :: [a] -> (a, a, a, a, a)
+tuplify5 (a:b:c:d:e:_) = (a, b, c, d, e)
+
+untuplify5 :: (a, a, a, a, a) -> [a]
+untuplify5 (a, b, c, d, e) = [a, b, c, d, e]
+
+tuplify4 :: [a] -> (a, a, a, a)
+tuplify4 (a:b:c:d:_) = (a, b, c, d)
+
 listToHand :: [Card] -> Hand
-listToHand (a:b:c:d:e:rest) = (a, b, c, d, e)
+listToHand = tuplify5
 
 handToList :: Hand -> [Card]
-handToList (a, b, c, d, e) = sort [a, b, c, d, e]
+handToList = sort . untuplify5
 
 makeHand :: [(Suit, Face)] -> Hand
 makeHand = listToHand . map (uncurry Card)
@@ -97,10 +109,23 @@ consec' _ = False
 
 groups :: Hand -> [(Face, Int)]
 groups h = map (head &&& length)
-            $ filter ((>1) . length)
+            -- $ filter ((>1) . length)
             $ group
             $ map face
             $ handToList h
+
+pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
+pairsWithKickers h =
+  map tuplify4
+  $ map (\x -> x:(rem x))
+  $ map head
+  $ filter ((>=2) . length)
+  $ group fs
+  where fs = map face $ handToList h
+        rem = reverse . sort . flip removeTwo fs
+
+removeTwo :: (Eq a) => a -> [a] -> [a]
+removeTwo x = delete x . delete x
 
 pairs :: Hand -> [Face]
 pairs h = map fst $ groups h
@@ -117,8 +142,11 @@ doublePairs h = map listToPair $ filter ((==2) . length) $ subsequences $ pairs 
 triplets :: Hand -> [Face]
 triplets h = map fst $ filter ((>2) . snd) $ groups h
 
+highFaces :: Hand -> [Face]
+highFaces = map face . handToList
+
 highFace :: Hand -> Face
-highFace = face . lastCard . sortHandByFace
+highFace = last . highFaces
 
 allSuits :: Hand -> [Suit]
 allSuits h = nub $ map suit $ handToList h
