@@ -6,6 +6,7 @@ import Data.Function
 import Data.List
 import Data.Maybe
 import Control.Applicative
+import Control.Arrow
 
 type Hand = (Card, Card, Card, Card, Card)
 
@@ -95,7 +96,7 @@ consec' (x:y:zs) | y == succ x = consec' $ y:zs
 consec' _ = False
 
 groups :: Hand -> [(Face, Int)]
-groups h = map (\xs -> ((head xs), (length xs)))
+groups h = map (head &&& length)
             $ filter ((>1) . length)
             $ group
             $ map face
