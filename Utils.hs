@@ -21,3 +21,6 @@ removeTwo x = delete x . delete x
 
 joinF :: (a -> [a]) -> a -> [a]
 joinF f x = x : f x
+
+tupF :: (a -> b) -> a -> (a, b)
+tupF f x = (x, f x)

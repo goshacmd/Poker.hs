@@ -67,7 +67,7 @@ bestHandCategory :: Hand -> HandCategory
 bestHandCategory = maximum . matches
 
 winningHand :: [Hand] -> (Hand, HandCategory)
-winningHand = maximumBy (on compare snd) . map (\h -> (h, bestHandCategory h))
+winningHand = maximumBy (on compare snd) . map (tupF bestHandCategory)
 
 -- Sample hands
 
@@ -96,20 +96,17 @@ consec hand = consec' $ map face $ handToList hand
 
 groups :: Hand -> [(Face, Int)]
 groups h = map (head &&& length)
-            $ filter ((>1) . length)
-            $ group
-            $ map face
-            $ handToList h
+         $ filter ((>1) . length)
+         $ group
+         $ map face
+         $ handToList h
 
 pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
-pairsWithKickers h =
-  map tuplify4
-  $ map (joinF rem)
-  $ map head
-  $ filter ((>=2) . length)
-  $ group fs
+pairsWithKickers h = map (tuplify4 . joinF rem . head)
+                   $ filter ((>=2) . length)
+                   $ group fs
   where fs = map face $ handToList h
-        rem = reverse . sort . flip removeTwo fs
+        rem = sortBy (flip compare) . flip removeTwo fs
 
 pairs :: Hand -> [Face]
 pairs h = map fst $ groups h
