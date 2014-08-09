@@ -17,7 +17,7 @@ data HandCategory = HighCard Face
                   | FullHouse Face Face
                   | FourOfAKind Face
                   | StraightFlush Suit Face
-                  deriving (Show, Eq)
+                  deriving (Show, Eq, Ord)
 
 -- Hand category detection
 

@@ -23,6 +23,9 @@ instance Ord Card where
 instance Show Card where
   show (Card s f) = show f ++ [head $ show s]
 
+instance Ord Suit where
+  compare _ _ = EQ
+
 instance Show Face where
   show Two   = "2"
   show Three = "3"
