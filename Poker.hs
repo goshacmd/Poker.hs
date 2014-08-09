@@ -73,6 +73,7 @@ winningHand = maximumBy (on compare snd) . map (tupF bestHandCategory)
 
 s_hc = makeHand [(Spades, Ace), (Diamonds, Jack), (Diamonds, Seven), (Hearts, Three), (Spades, Queen)]
 s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six), (Hearts, Seven), (Hearts, Eight)]
+s_p  = makeHand [(Diamonds, Five), (Spades, Five), (Hearts, Seven), (Spades, Queen), (Clubs, Ace)]
 
 -- Util
 
@@ -106,7 +107,8 @@ pairsWithKickers h = map (tuplify4 . joinF rem . head)
                    $ filter ((>=2) . length)
                    $ group fs
   where fs = map face $ handToList h
-        rem = sortBy (flip compare) . flip removeTwo fs
+        rt x = rep 2 (delete x)
+        rem = sortBy (flip compare) . flip rt fs
 
 pairs :: Hand -> [Face]
 pairs h = map fst $ groups h

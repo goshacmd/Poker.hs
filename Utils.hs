@@ -2,7 +2,7 @@ module Utils (tuplify5,
               untuplify5,
               tuplify4,
               consec',
-              removeTwo,
+              rep,
               joinF,
               tupF)
   where
@@ -29,8 +29,9 @@ consec' (x:[]) = True
 consec' (x:y:zs) | y == succ x = consec' $ y:zs
 consec' _ = False
 
-removeTwo :: (Eq a) => a -> [a] -> [a]
-removeTwo x = delete x . delete x
+rep :: Int -> (a -> a) -> (a -> a)
+rep 1 f = f
+rep n f = f . rep (n - 1) f
 
 joinF :: (a -> [a]) -> a -> [a]
 joinF f x = x : f x
