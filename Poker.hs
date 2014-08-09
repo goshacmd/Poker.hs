@@ -104,7 +104,7 @@ groups h = map (head &&& length)
 pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
 pairsWithKickers h =
   map tuplify4
-  $ map (\x -> x:(rem x))
+  $ map (joinF rem)
   $ map head
   $ filter ((>=2) . length)
   $ group fs

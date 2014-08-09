@@ -18,3 +18,6 @@ consec' _ = False
 
 removeTwo :: (Eq a) => a -> [a] -> [a]
 removeTwo x = delete x . delete x
+
+joinF :: (a -> [a]) -> a -> [a]
+joinF f x = x : f x
