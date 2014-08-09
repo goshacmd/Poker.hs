@@ -2,6 +2,7 @@ module Poker
   where
 
 import Cards
+import Utils
 import Data.Function
 import Data.List
 import Data.Tuple.Curry
@@ -75,15 +76,6 @@ s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six),
 
 -- Util
 
-tuplify5 :: [a] -> (a, a, a, a, a)
-tuplify5 (a:b:c:d:e:_) = (a, b, c, d, e)
-
-untuplify5 :: (a, a, a, a, a) -> [a]
-untuplify5 (a, b, c, d, e) = [a, b, c, d, e]
-
-tuplify4 :: [a] -> (a, a, a, a)
-tuplify4 (a:b:c:d:_) = (a, b, c, d)
-
 listToHand :: [Card] -> Hand
 listToHand = tuplify5
 
@@ -102,14 +94,9 @@ sortHandByFace = listToHand . handToList
 consec :: Hand -> Bool
 consec hand = consec' $ map face $ handToList hand
 
-consec' :: (Eq a, Enum a) => [a] -> Bool
-consec' (x:[]) = True
-consec' (x:y:zs) | y == succ x = consec' $ y:zs
-consec' _ = False
-
 groups :: Hand -> [(Face, Int)]
 groups h = map (head &&& length)
-            -- $ filter ((>1) . length)
+            $ filter ((>1) . length)
             $ group
             $ map face
             $ handToList h
@@ -123,9 +110,6 @@ pairsWithKickers h =
   $ group fs
   where fs = map face $ handToList h
         rem = reverse . sort . flip removeTwo fs
-
-removeTwo :: (Eq a) => a -> [a] -> [a]
-removeTwo x = delete x . delete x
 
 pairs :: Hand -> [Face]
 pairs h = map fst $ groups h
