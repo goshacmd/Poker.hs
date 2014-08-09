@@ -59,12 +59,8 @@ matches h = concat $
 
 -- Sample hands
 
-h = (Card Spades Ace, Card Diamonds Jack, Card Diamonds Seven, Card Hearts Three, Card Spades Queen)
-hh = (Card Clubs Queen, Card Clubs King, Card Hearts King, Card Spades Ace, Card Diamonds Six)
-th = (Card Clubs Queen, Card Diamonds Queen, Card Spades King, Card Hearts King, Card Hearts Queen)
-fh = (Card Clubs Ace, Card Clubs Four, Card Clubs Nine, Card Clubs Ten, Card Clubs King)
-ch = (Card Diamonds Five, Card Diamonds Six, Card Clubs Seven, Card Hearts Eight, Card Diamonds Nine)
-cfh = (Card Clubs Two, Card Clubs Three, Card Clubs Four, Card Clubs Five, Card Clubs Six)
+s_hc = makeHand [(Spades, Ace), (Diamonds, Jack), (Diamonds, Seven), (Hearts, Three), (Spades, Queen)]
+s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six), (Hearts, Seven), (Hearts, Eight)]
 
 -- Util
 
@@ -73,6 +69,9 @@ listToHand (a:b:c:d:e:rest) = (a, b, c, d, e)
 
 handToList :: Hand -> [Card]
 handToList (a, b, c, d, e) = sort [a, b, c, d, e]
+
+makeHand :: [(Suit, Face)] -> Hand
+makeHand = listToHand . map (uncurry Card)
 
 lastCard :: Hand -> Card
 lastCard (_, _, _, _, a) = a
