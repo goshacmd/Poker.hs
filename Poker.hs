@@ -107,8 +107,7 @@ pairsWithKickers h = map (tuplify4 . joinF rem . head)
                    $ filter ((>=2) . length)
                    $ group fs
   where fs = map face $ handToList h
-        rt x = rep 2 (delete x)
-        rem = sortBy (flip compare) . flip rt fs
+        rem = sortBy (flip compare) . flip (rep 2 . delete) fs
 
 pairs :: Hand -> [Face]
 pairs h = map fst $ groups h
