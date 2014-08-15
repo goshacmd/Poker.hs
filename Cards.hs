@@ -36,7 +36,7 @@ instance Show Face where
   show Seven = "7"
   show Eight = "8"
   show Nine  = "9"
-  show Ten   = "10"
+  show Ten   = "T"
   show Jack  = "J"
   show Queen = "Q"
   show King  = "K"
