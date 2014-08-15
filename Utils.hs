@@ -1,6 +1,10 @@
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+
 module Utils (tuplify5,
               untuplify5,
               tuplify4,
+              tuplify2,
+              untuplify2,
               consec',
               rep,
               joinF,
@@ -23,6 +27,12 @@ untuplify5 (a, b, c, d, e) = [a, b, c, d, e]
 
 tuplify4 :: [a] -> (a, a, a, a)
 tuplify4 (a:b:c:d:_) = (a, b, c, d)
+
+tuplify2 :: [a] -> (a, a)
+tuplify2 (a:b:_) = (a, b)
+
+untuplify2 :: (a, a) -> [a]
+untuplify2 (a, b) = [a, b]
 
 consec' :: (Eq a, Enum a) => [a] -> Bool
 consec' (x:[]) = True
