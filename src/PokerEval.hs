@@ -76,7 +76,7 @@ premium2' :: [Face] -> Bool -> Bool
 premium2' fs suited = fs == [Queen, Queen] || fs == [Jack, Jack] || (suited && fs == [King, Ace])
 
 premium3' :: [Face] -> Bool
-premium3' fs = any (==fs) [[Ten, Ten], [King, Ace], [Queen, Ace], [Jack, Ace], [Queen, King]]
+premium3' fs = fs `elem` [[Ten, Ten], [King, Ace], [Queen, Ace], [Jack, Ace], [Queen, King]]
 
 pair :: Pocket -> Bool
 pair (a, b) = face a == face b

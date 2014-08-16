@@ -53,7 +53,7 @@ facedDeck :: Face -> Deck -> Deck
 facedDeck = facedDeck' . pure
 
 facedDeck' :: [Face] -> Deck -> Deck
-facedDeck' fs = filter (\x -> (face x) `elem` fs)
+facedDeck' = filter . fIn face
 
 without :: [Card] -> Deck -> Deck
 without cards deck = deck \\ cards

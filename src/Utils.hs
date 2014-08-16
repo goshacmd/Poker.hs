@@ -40,6 +40,9 @@ tupF f x = (x, f x)
 fEq :: Eq b => (a -> b) -> b -> (a -> Bool)
 fEq f val = (== val) . f
 
+fIn :: Eq b => (a -> b) -> [b] -> (a -> Bool)
+fIn f vals = flip elem vals . f
+
 groupedBy :: Ord b => (a -> b) -> [a] -> [[a]]
 groupedBy f = groupBy (on (==) f) . sortBy (on compare f)
 
