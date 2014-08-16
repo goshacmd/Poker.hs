@@ -5,38 +5,40 @@ import Cards
 import Utils
 import Data.List
 
-type SHand = (Card, Card) -- Starting hand
+type Pocket = (Card, Card) -- Starting hand
 
-data SHandCategory = Premium1 -- AA, KK
-                   | Premium2 -- QQ, JJ, AK (suited)
-                   | Premium3 -- TT, AK, AQ, AJ, KQ
-                   | SuitedConnected
-                   | Suited
-                   | Connected
-                   | Junk
-                   deriving (Show)
+type CommunityFlop = (Card, Card, Card)
 
-evalStartingHand :: SHand -> SHandCategory
-evalStartingHand h | premium1 h = Premium1
-evalStartingHand h | premium2 h = Premium2
-evalStartingHand h | premium3 h = Premium3
-evalStartingHand h | suitedConnected h = SuitedConnected
-evalStartingHand h | suited h = Suited
-evalStartingHand h | connected h = Connected
-evalStartingHand _ = Junk
+data PocketCategory = Premium1 -- AA, KK
+                    | Premium2 -- QQ, JJ, AK (suited)
+                    | Premium3 -- TT, AK, AQ, AJ, KQ
+                    | SuitedConnected
+                    | Suited
+                    | Connected
+                    | Junk
+                    deriving (Show)
+
+evalPocket :: Pocket -> PocketCategory
+evalPocket h | premium1 h = Premium1
+evalPocket h | premium2 h = Premium2
+evalPocket h | premium3 h = Premium3
+evalPocket h | suitedConnected h = SuitedConnected
+evalPocket h | suited h = Suited
+evalPocket h | connected h = Connected
+evalPocket _ = Junk
 
 -- Util
 
-faces :: SHand -> [Face]
+faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
 
-premium1 :: SHand -> Bool
+premium1 :: Pocket -> Bool
 premium1 = premium1' . faces
 
-premium2 :: SHand -> Bool
+premium2 :: Pocket -> Bool
 premium2 h = premium2' (faces h) (suited h)
 
-premium3 :: SHand -> Bool
+premium3 :: Pocket -> Bool
 premium3 = premium3' . sort . faces
 
 premium1' :: [Face] -> Bool
@@ -48,17 +50,17 @@ premium2' fs suited = fs == [Queen, Queen] || fs == [Jack, Jack] || (suited && s
 premium3' :: [Face] -> Bool
 premium3' fs = fs == [Ten, Ten] || fs == [King, Ace] || fs == [Queen, Ace] || fs == [Jack, Ace] || fs == [Queen, King]
 
-pair :: SHand -> Bool
+pair :: Pocket -> Bool
 pair (a, b) = face a == face b
 
-suitedConnected :: SHand -> Bool
+suitedConnected :: Pocket -> Bool
 suitedConnected h = suited h && connected h
 
-suited :: SHand -> Bool
+suited :: Pocket -> Bool
 suited (a, b) = suit a == suit b
 
-connected :: SHand -> Bool
+connected :: Pocket -> Bool
 connected = (==1) . gap
 
-gap :: SHand -> Int
+gap :: Pocket -> Int
 gap = abs . foldr (-) 0 . map (fromEnum . face) . sort . untuplify2
