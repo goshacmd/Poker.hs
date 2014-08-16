@@ -5,6 +5,7 @@ import Cards
 import Utils
 import Data.List
 import Data.Function
+import Control.Applicative
 
 type Pocket = (Card, Card) -- Starting hand
 
@@ -27,6 +28,9 @@ evalPocket h | suitedConnected h = SuitedConnected
 evalPocket h | suited h = Suited
 evalPocket h | connected h = Connected
 evalPocket _ = Junk
+
+outs :: [Card] -> [Card]
+outs h = sort $ nub $ concat $ [ flushDrawOuts ] <*> [h]
 
 flushDrawOuts :: [Card] -> [Card]
 flushDrawOuts = maybeList . fmap outsForFlushDraw . flushDraw
