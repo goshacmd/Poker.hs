@@ -1,5 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
-
 module Utils
   where
 
