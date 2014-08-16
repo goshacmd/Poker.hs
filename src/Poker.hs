@@ -58,7 +58,7 @@ straightFlush h | isStraightFlush h = return $ StraightFlush (oneSuit h) (highFa
 straightFlush _ = Nothing
 
 matches :: Hand -> [HandCategory]
-matches h = sort $ concat $
+matches h = sort . concat $
   [
     return . highCard,
     onePair,
@@ -103,35 +103,37 @@ sortHandByFace :: Hand -> Hand
 sortHandByFace = listToHand . handToList
 
 consec :: Hand -> Bool
-consec hand = consec' $ map face $ handToList hand
+consec = consec' . map face . handToList
 
-groups :: Hand -> [(Face, Int)]
-groups h = map (head &&& length)
-         $ filter ((>1) . length)
-         $ group
-         $ map face
-         $ handToList h
+groups :: [Card] -> [(Face, Int)]
+groups = map (head &&& length)
+       . filter ((>1) . length)
+       . group
+       . map face
 
 groupsWithKickers :: Int -> Hand -> [[Face]]
 groupsWithKickers n h = map (joinF rem . head)
-                      $ filter ((>=n) . length)
+                      . filter ((>=n) . length)
                       $ group fs
   where fs = map face $ handToList h
         rem = sortBy (flip compare) . flip (rep n . delete) fs
 
 groupsWithCount :: (Int -> Bool) -> Hand -> [Face]
-groupsWithCount f = map fst . filter (f . snd) . groups
+groupsWithCount f = map fst . filter (f . snd) . groups . handToList
 
 pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
 pairsWithKickers = map tuplify4 . groupsWithKickers 2
 
-pairs :: Hand -> [Face]
-pairs h = map fst $ groups h
+pairs :: [Card] -> [Face]
+pairs = map fst . groups
 
 doublePairs :: Hand -> [(Face, Face, Kicker)]
-doublePairs h = map withKicker . filter ((==2) . length) . subsequences . pairs $ h
+doublePairs h = map withKicker . doublePairs' . handToList $ h
   where fs = map face $ handToList h
-        withKicker (x:y:_) = (x, y, (head $ fs \\ [x, y]))
+        withKicker (x, y) = (x, y, head $ fs \\ [x, y])
+
+doublePairs' :: [Card] -> [(Face, Face)]
+doublePairs' = map tuplify2 . filter ((==2) . length) . subsequences . pairs
 
 triplets :: Hand -> [Face]
 triplets = groupsWithCount (>=3)

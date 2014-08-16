@@ -2,6 +2,7 @@ module PokerEval
   where
 
 import Cards
+import qualified Poker as P
 import Utils
 import Data.List
 import Control.Applicative
@@ -29,10 +30,18 @@ evalPocket h | connected h = Connected
 evalPocket _ = Junk
 
 outs :: [Card] -> [Card]
-outs h = sort $ nub $ concat $ [ flushDrawOuts ] <*> [h]
+outs h = sort . nub . concat $
+  [
+    flushDrawOuts,
+    twoPairToHouseDrawOuts
+  ] <*> [sort h]
 
 flushDrawOuts :: [Card] -> [Card]
 flushDrawOuts = maybeList . fmap outsForFlushDraw . flushDraw
+
+twoPairToHouseDrawOuts :: [Card] -> [Card]
+twoPairToHouseDrawOuts xs = d \\ xs
+  where d = facedDeck' (nub $ concatMap untuplify2 $ P.doublePairs' xs) deck
 
 -- Util
 

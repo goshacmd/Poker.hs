@@ -50,7 +50,10 @@ suitedDeck :: Suit -> Deck -> Deck
 suitedDeck = filter . fEq suit
 
 facedDeck :: Face -> Deck -> Deck
-facedDeck = filter . fEq face
+facedDeck = facedDeck' . pure
+
+facedDeck' :: [Face] -> Deck -> Deck
+facedDeck' fs = filter (\x -> (face x) `elem` fs)
 
 without :: [Card] -> Deck -> Deck
 without cards deck = deck \\ cards
