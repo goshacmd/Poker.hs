@@ -1,4 +1,4 @@
-module PokerEval
+module Poker.Eval
   where
 
 import Cards

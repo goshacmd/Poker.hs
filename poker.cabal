@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Cards, Poker, PokerEval
+  exposed-modules:     Cards, Poker, Poker.Eval
   -- other-modules:
   -- other-extensions:    MultiParamTypeClasses, FlexibleInstances, ExistentialQuantification
   build-depends:       base >=4.7 && <4.8, tuple >=0.2 && <0.3, split >=0.2 && <0.3
