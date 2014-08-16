@@ -51,7 +51,7 @@ fullHouse :: Hand -> Maybe HandCategory
 fullHouse h = uncurryN FullHouse `fmap` oneFullHouse h
 
 fourOfAKind :: Hand -> Maybe HandCategory
-fourOfAKind _ = Nothing -- TODO
+fourOfAKind h = FourOfAKind `fmap` oneSet h
 
 straightFlush :: Hand -> Maybe HandCategory
 straightFlush h | isStraightFlush h = return $ StraightFlush (oneSuit h) (highFace h)
@@ -83,6 +83,7 @@ s_hc = makeHand [(Spades, Ace), (Diamonds, Jack), (Diamonds, Seven), (Hearts, Th
 s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six), (Hearts, Seven), (Hearts, Eight)]
 s_p  = makeHand [(Diamonds, Five), (Spades, Five), (Hearts, Seven), (Spades, Queen), (Clubs, Ace)]
 s_fh = makeHand [(Diamonds, Two), (Spades, Two), (Hearts, Two), (Clubs, King), (Hearts, King)]
+s_s  = makeHand [(Diamonds, Three), (Spades, Three), (Spades, Four), (Clubs, Three), (Hearts, Three)]
 
 -- Util
 
@@ -142,12 +143,18 @@ exactlyPairs = groupsWithCount (==2)
 exactlyTriplets :: Hand -> [Face]
 exactlyTriplets = groupsWithCount (==3)
 
+exactlySets :: Hand -> [Face]
+exactlySets = groupsWithCount (==4)
+
 oneFullHouse :: Hand -> Maybe (Face, Face)
 oneFullHouse h = f (maybeHead p) (maybeHead t)
   where p = exactlyPairs h
         t = exactlyTriplets h
         f (Just pp) (Just tt) = Just (pp, tt)
         f _ _ = Nothing
+
+oneSet :: Hand -> Maybe Face
+oneSet = maybeHead . exactlySets
 
 highFaces :: Hand -> [Face]
 highFaces = map face . handToList
