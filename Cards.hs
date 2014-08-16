@@ -1,11 +1,4 @@
-module Cards (Deck,
-              Card(..),
-              Suit(..),
-              Face(..),
-              deck,
-              suitedDeck,
-              facedDeck,
-              without)
+module Cards
   where
 
 import Utils

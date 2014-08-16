@@ -4,7 +4,6 @@ module PokerEval
 import Cards
 import Utils
 import Data.List
-import Data.Function
 import Control.Applicative
 
 type Pocket = (Card, Card) -- Starting hand
@@ -46,7 +45,7 @@ outsForFlushDraw :: FlushDraw -> [Card]
 outsForFlushDraw (cards, suit) = without cards $ suitedDeck suit deck
 
 flushDraws :: [Card] -> [([Card], Suit)]
-flushDraws = map withSuit . filter (fEq length 4) . groupBy (on (==) suit) . sortBy (on compare suit)
+flushDraws = map withSuit . filter (fEq length 4) . groupedBy suit
   where withSuit cards@(a:_) = (cards, suit a)
 
 faces :: Pocket -> [Face]

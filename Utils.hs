@@ -4,6 +4,7 @@ module Utils
   where
 
 import Data.List
+import Data.Function
 
 tuplify5 :: [a] -> (a, a, a, a, a)
 tuplify5 (a:b:c:d:e:_) = (a, b, c, d, e)
@@ -37,6 +38,9 @@ tupF f x = (x, f x)
 
 fEq :: Eq b => (a -> b) -> b -> (a -> Bool)
 fEq f val = (== val) . f
+
+groupedBy :: Ord b => (a -> b) -> [a] -> [[a]]
+groupedBy f = groupBy (on (==) f) . sortBy (on compare f)
 
 maybeList :: Maybe [a] -> [a]
 maybeList (Just a) = a
