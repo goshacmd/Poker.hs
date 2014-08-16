@@ -16,12 +16,12 @@ type Kicker = Face
 
 data HandCategory = HighCard Kicker Kicker Kicker Kicker Kicker
                   | OnePair Face Kicker Kicker Kicker
-                  | TwoPair Face Face
-                  | ThreeOfAKind Face
+                  | TwoPair Face Face Kicker
+                  | ThreeOfAKind Face Kicker Kicker
                   | Straight Face
                   | Flush Suit Face
                   | FullHouse Face Face
-                  | FourOfAKind Face
+                  | FourOfAKind Face Kicker
                   | StraightFlush Suit Face
                   deriving (Show, Eq, Ord)
 
@@ -34,10 +34,10 @@ onePair :: Hand -> [HandCategory]
 onePair = map (uncurryN OnePair) . pairsWithKickers
 
 twoPair :: Hand -> [HandCategory]
-twoPair = map pairToTwoPair . doublePairs
+twoPair = map (uncurryN TwoPair) . doublePairs
 
 threeOfAKind :: Hand -> [HandCategory]
-threeOfAKind = map ThreeOfAKind . triplets
+threeOfAKind = map (uncurryN ThreeOfAKind) . tripletsWithKickers
 
 straight :: Hand -> Maybe HandCategory
 straight h | isStraight h = return . Straight $ highFace h
@@ -51,7 +51,7 @@ fullHouse :: Hand -> Maybe HandCategory
 fullHouse h = uncurryN FullHouse `fmap` oneFullHouse h
 
 fourOfAKind :: Hand -> Maybe HandCategory
-fourOfAKind h = FourOfAKind `fmap` oneSet h
+fourOfAKind h = uncurryN FourOfAKind `fmap` oneSet h
 
 straightFlush :: Hand -> Maybe HandCategory
 straightFlush h | isStraightFlush h = return $ StraightFlush (oneSuit h) (highFace h)
@@ -112,30 +112,32 @@ groups h = map (head &&& length)
          $ map face
          $ handToList h
 
+groupsWithKickers :: Int -> Hand -> [[Face]]
+groupsWithKickers n h = map (joinF rem . head)
+                      $ filter ((>=n) . length)
+                      $ group fs
+  where fs = map face $ handToList h
+        rem = sortBy (flip compare) . flip (rep n . delete) fs
+
 groupsWithCount :: (Int -> Bool) -> Hand -> [Face]
 groupsWithCount f = map fst . filter (f . snd) . groups
 
 pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
-pairsWithKickers h = map (tuplify4 . joinF rem . head)
-                   $ filter ((>=2) . length)
-                   $ group fs
-  where fs = map face $ handToList h
-        rem = sortBy (flip compare) . flip (rep 2 . delete) fs
+pairsWithKickers = map tuplify4 . groupsWithKickers 2
 
 pairs :: Hand -> [Face]
 pairs h = map fst $ groups h
 
-listToPair :: [a] -> (a, a)
-listToPair (x:y:_) = (x, y)
-
-pairToTwoPair :: (Face, Face) -> HandCategory
-pairToTwoPair = uncurry TwoPair
-
-doublePairs :: Hand -> [(Face, Face)]
-doublePairs = map listToPair . filter ((==2) . length) . subsequences . pairs
+doublePairs :: Hand -> [(Face, Face, Kicker)]
+doublePairs h = map withKicker . filter ((==2) . length) . subsequences . pairs $ h
+  where fs = map face $ handToList h
+        withKicker (x:y:_) = (x, y, (head $ fs \\ [x, y]))
 
 triplets :: Hand -> [Face]
 triplets = groupsWithCount (>=3)
+
+tripletsWithKickers :: Hand -> [(Face, Kicker, Kicker)]
+tripletsWithKickers = map tuplify3 . groupsWithKickers 3
 
 exactlyPairs :: Hand -> [Face]
 exactlyPairs = groupsWithCount (==2)
@@ -143,8 +145,8 @@ exactlyPairs = groupsWithCount (==2)
 exactlyTriplets :: Hand -> [Face]
 exactlyTriplets = groupsWithCount (==3)
 
-exactlySets :: Hand -> [Face]
-exactlySets = groupsWithCount (==4)
+exactlySets :: Hand -> [(Face, Kicker)]
+exactlySets = map tuplify2 . groupsWithKickers 4
 
 oneFullHouse :: Hand -> Maybe (Face, Face)
 oneFullHouse h = f (maybeHead p) (maybeHead t)
@@ -153,7 +155,7 @@ oneFullHouse h = f (maybeHead p) (maybeHead t)
         f (Just pp) (Just tt) = Just (pp, tt)
         f _ _ = Nothing
 
-oneSet :: Hand -> Maybe Face
+oneSet :: Hand -> Maybe (Face, Kicker)
 oneSet = maybeHead . exactlySets
 
 highFaces :: Hand -> [Face]

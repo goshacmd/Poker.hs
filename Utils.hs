@@ -15,6 +15,9 @@ untuplify5 (a, b, c, d, e) = [a, b, c, d, e]
 tuplify4 :: [a] -> (a, a, a, a)
 tuplify4 (a:b:c:d:_) = (a, b, c, d)
 
+tuplify3 :: [a] -> (a, a, a)
+tuplify3 (a:b:c:_) = (a, b, c)
+
 tuplify2 :: [a] -> (a, a)
 tuplify2 (a:b:_) = (a, b)
 
