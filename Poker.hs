@@ -48,7 +48,7 @@ flush h | isFlush h = return $ Flush (oneSuit h) (highFace h)
 flush _ = Nothing
 
 fullHouse :: Hand -> Maybe HandCategory
-fullHouse _ = Nothing -- TODO
+fullHouse h = uncurryN FullHouse `fmap` oneFullHouse h
 
 fourOfAKind :: Hand -> Maybe HandCategory
 fourOfAKind _ = Nothing -- TODO
@@ -67,7 +67,7 @@ matches h = sort $ concat $
     maybeToList . straight,
     maybeToList . flush,
     maybeToList . fullHouse,
-    maybeToList . fourOfAKind
+    maybeToList . fourOfAKind,
     maybeToList . straightFlush
   ] <*> [h]
 
@@ -82,6 +82,7 @@ winningHand = maximumBy (on compare snd) . map (tupF bestHandCategory)
 s_hc = makeHand [(Spades, Ace), (Diamonds, Jack), (Diamonds, Seven), (Hearts, Three), (Spades, Queen)]
 s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six), (Hearts, Seven), (Hearts, Eight)]
 s_p  = makeHand [(Diamonds, Five), (Spades, Five), (Hearts, Seven), (Spades, Queen), (Clubs, Ace)]
+s_fh = makeHand [(Diamonds, Two), (Spades, Two), (Hearts, Two), (Clubs, King), (Hearts, King)]
 
 -- Util
 
@@ -110,6 +111,9 @@ groups h = map (head &&& length)
          $ map face
          $ handToList h
 
+groupsWithCount :: (Int -> Bool) -> Hand -> [Face]
+groupsWithCount f = map fst . filter (f . snd) . groups
+
 pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
 pairsWithKickers h = map (tuplify4 . joinF rem . head)
                    $ filter ((>=2) . length)
@@ -127,10 +131,23 @@ pairToTwoPair :: (Face, Face) -> HandCategory
 pairToTwoPair = uncurry TwoPair
 
 doublePairs :: Hand -> [(Face, Face)]
-doublePairs h = map listToPair $ filter ((==2) . length) $ subsequences $ pairs h
+doublePairs = map listToPair . filter ((==2) . length) . subsequences . pairs
 
 triplets :: Hand -> [Face]
-triplets h = map fst $ filter ((>2) . snd) $ groups h
+triplets = groupsWithCount (>=3)
+
+exactlyPairs :: Hand -> [Face]
+exactlyPairs = groupsWithCount (==2)
+
+exactlyTriplets :: Hand -> [Face]
+exactlyTriplets = groupsWithCount (==3)
+
+oneFullHouse :: Hand -> Maybe (Face, Face)
+oneFullHouse h = f (maybeHead p) (maybeHead t)
+  where p = exactlyPairs h
+        t = exactlyTriplets h
+        f (Just pp) (Just tt) = Just (pp, tt)
+        f _ _ = Nothing
 
 highFaces :: Hand -> [Face]
 highFaces = map face . handToList
