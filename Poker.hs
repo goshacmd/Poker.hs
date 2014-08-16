@@ -47,12 +47,18 @@ flush :: Hand -> Maybe HandCategory
 flush h | isFlush h = return $ Flush (oneSuit h) (highFace h)
 flush _ = Nothing
 
+fullHouse :: Hand -> Maybe HandCategory
+fullHouse _ = Nothing -- TODO
+
+fourOfAKind :: Hand -> Maybe HandCategory
+fourOfAKind _ = Nothing -- TODO
+
 straightFlush :: Hand -> Maybe HandCategory
 straightFlush h | isStraightFlush h = return $ StraightFlush (oneSuit h) (highFace h)
 straightFlush _ = Nothing
 
 matches :: Hand -> [HandCategory]
-matches h = concat $
+matches h = sort $ concat $
   [
     return . highCard,
     onePair,
@@ -60,6 +66,8 @@ matches h = concat $
     threeOfAKind,
     maybeToList . straight,
     maybeToList . flush,
+    maybeToList . fullHouse,
+    maybeToList . fourOfAKind
     maybeToList . straightFlush
   ] <*> [h]
 
