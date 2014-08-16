@@ -48,10 +48,10 @@ flush h | isFlush h = return $ Flush (oneSuit h) (highFace h)
 flush _ = Nothing
 
 fullHouse :: Hand -> Maybe HandCategory
-fullHouse h = uncurryN FullHouse `fmap` oneFullHouse h
+fullHouse h = uncurryN FullHouse <$> oneFullHouse h
 
 fourOfAKind :: Hand -> Maybe HandCategory
-fourOfAKind h = uncurryN FourOfAKind `fmap` oneSet h
+fourOfAKind h = uncurryN FourOfAKind <$> oneSet h
 
 straightFlush :: Hand -> Maybe HandCategory
 straightFlush h | isStraightFlush h = return $ StraightFlush (oneSuit h) (highFace h)
