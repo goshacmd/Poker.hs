@@ -4,6 +4,7 @@ module Cards
 import Utils
 import Data.Function
 import Data.List
+import Data.List.Split
 import Data.Ord
 import Control.Applicative
 
@@ -42,6 +43,33 @@ instance Show Face where
   show Queen = "Q"
   show King  = "K"
   show Ace   = "A"
+
+readSuit :: Char -> Suit
+readSuit 'H' = Hearts
+readSuit 'D' = Diamonds
+readSuit 'C' = Clubs
+readSuit 'S' = Spades
+
+readFace :: Char -> Face
+readFace '2' = Two
+readFace '3' = Three
+readFace '4' = Four
+readFace '5' = Five
+readFace '6' = Six
+readFace '7' = Seven
+readFace '8' = Eight
+readFace '9' = Nine
+readFace 'T' = Ten
+readFace 'J' = Jack
+readFace 'Q' = Queen
+readFace 'K' = King
+readFace 'A' = Ace
+
+readCard :: (Char, Char) -> Card
+readCard (f, s) = Card (readSuit s) (readFace f)
+
+readCards :: String -> [Card]
+readCards = map (readCard . tuplify2) . splitOn " "
 
 deck :: Deck
 deck = Card <$> [minBound..maxBound] <*> [minBound..maxBound]
