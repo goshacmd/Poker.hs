@@ -55,7 +55,7 @@ premium1 :: Pocket -> Bool
 premium1 = premium1' . faces
 
 premium2 :: Pocket -> Bool
-premium2 h = premium2' (faces h) (suited h)
+premium2 h = premium2' (sort $ faces h) (suited h)
 
 premium3 :: Pocket -> Bool
 premium3 = premium3' . sort . faces
@@ -64,10 +64,10 @@ premium1' :: [Face] -> Bool
 premium1' fs = fs == [Ace, Ace] || fs == [King, King]
 
 premium2' :: [Face] -> Bool -> Bool
-premium2' fs suited = fs == [Queen, Queen] || fs == [Jack, Jack] || (suited && sort fs == [King, Ace])
+premium2' fs suited = fs == [Queen, Queen] || fs == [Jack, Jack] || (suited && fs == [King, Ace])
 
 premium3' :: [Face] -> Bool
-premium3' fs = fs == [Ten, Ten] || fs == [King, Ace] || fs == [Queen, Ace] || fs == [Jack, Ace] || fs == [Queen, King]
+premium3' fs = any (==fs) [[Ten, Ten], [King, Ace], [Queen, Ace], [Jack, Ace], [Queen, King]]
 
 pair :: Pocket -> Bool
 pair (a, b) = face a == face b
