@@ -30,18 +30,16 @@ evalPocket h | connected h = Connected
 evalPocket _ = Junk
 
 outs :: [Card] -> [Card]
-outs h = sort . nub . concat $
-  [
-    flushDrawOuts,
-    twoPairToHouseDrawOuts
-  ] <*> [sort h]
-
-flushDrawOuts :: [Card] -> [Card]
-flushDrawOuts = maybeList . fmap outsForFlushDraw . flushDraw
-
-twoPairToHouseDrawOuts :: [Card] -> [Card]
-twoPairToHouseDrawOuts xs = d \\ xs
-  where d = facedDeck' (nub $ concatMap untuplify2 $ P.doublePairs' xs) deck
+outs xs = sort bestCards
+  where additionalCards = without xs deck
+        curr = filter ((==5) . length) $ subsequences xs
+        bestCurr = P.rank $ maximum $ map (P.bestHandCategory . P.listToHand) curr
+        subs = filter ((==4) . length) $ subsequences xs
+        possibleHands = flip (:) <$> subs <*> additionalCards
+        zip h = (P.bestHandCategory $ P.listToHand h, head $ h \\ xs)
+        possibleCategories = map zip possibleHands
+        bestPossible = filter ((>bestCurr) . P.rank .fst) possibleCategories
+        bestCards = nub $ map snd bestPossible
 
 -- Util
 

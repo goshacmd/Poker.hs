@@ -25,6 +25,20 @@ data HandCategory = HighCard Kicker Kicker Kicker Kicker Kicker
                   | StraightFlush Suit Face
                   deriving (Show, Eq, Ord)
 
+data HandRank = HighCardR | OnePairR | TwoPairR | ThreeOfAKindR | StraightR | FlushR | FullHouseR | FourOfAKindR | StraightFlushR
+                deriving (Show, Eq, Ord)
+
+rank :: HandCategory -> HandRank
+rank HighCard{}      = HighCardR
+rank OnePair{}       = OnePairR
+rank TwoPair{}       = TwoPairR
+rank ThreeOfAKind{}  = ThreeOfAKindR
+rank Straight{}      = StraightR
+rank Flush{}         = FlushR
+rank FullHouse{}     = FullHouseR
+rank FourOfAKind{}   = FourOfAKindR
+rank StraightFlush{} = StraightFlushR
+
 -- Hand category detection
 
 highCard :: Hand -> HandCategory
