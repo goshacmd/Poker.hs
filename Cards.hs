@@ -1,6 +1,14 @@
-module Cards (Deck, Card(..), Suit(..), Face(..), deck)
+module Cards (Deck,
+              Card(..),
+              Suit(..),
+              Face(..),
+              deck,
+              suitedDeck,
+              facedDeck,
+              without)
   where
 
+import Utils
 import Data.Function
 import Data.List
 import Data.Ord
@@ -44,3 +52,12 @@ instance Show Face where
 
 deck :: Deck
 deck = Card <$> [minBound..maxBound] <*> [minBound..maxBound]
+
+suitedDeck :: Suit -> Deck -> Deck
+suitedDeck = filter . fEq suit
+
+facedDeck :: Face -> Deck -> Deck
+facedDeck = filter . fEq face
+
+without :: [Card] -> Deck -> Deck
+without cards deck = deck \\ cards

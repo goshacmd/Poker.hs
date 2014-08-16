@@ -4,6 +4,7 @@ module PokerEval
 import Cards
 import Utils
 import Data.List
+import Data.Function
 
 type Pocket = (Card, Card) -- Starting hand
 
@@ -27,7 +28,22 @@ evalPocket h | suited h = Suited
 evalPocket h | connected h = Connected
 evalPocket _ = Junk
 
+flushDrawOuts :: [Card] -> [Card]
+flushDrawOuts = maybeList . fmap outsForFlushDraw . flushDraw
+
 -- Util
+
+type FlushDraw = ([Card], Suit)
+
+flushDraw :: [Card] -> Maybe FlushDraw
+flushDraw = maybeHead . flushDraws
+
+outsForFlushDraw :: FlushDraw -> [Card]
+outsForFlushDraw (cards, suit) = without cards $ suitedDeck suit deck
+
+flushDraws :: [Card] -> [([Card], Suit)]
+flushDraws = map withSuit . filter (fEq length 4) . groupBy (on (==) suit) . sortBy (on compare suit)
+  where withSuit cards@(a:_) = (cards, suit a)
 
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
