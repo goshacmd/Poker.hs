@@ -3,8 +3,9 @@ module Poker.Eval where
 import Cards
 import qualified Poker as P
 import Utils
-import Data.Tuple.Pack
 import Data.List
+import Data.List.Subs
+import Data.Tuple.Pack
 import Control.Applicative
 import Control.Arrow
 
@@ -40,12 +41,12 @@ outs xs = sort . nub. map snd
 -- Util
 
 possibleHands :: [Card] -> [[Card]]
-possibleHands xs = flip (:) <$> P.subsequencesN 4 xs <*> without xs deck
+possibleHands xs = flip (:) <$> subsequencesN 4 xs <*> without xs deck
 
 possibleOpponentPockets :: Pocket -> CommunityFlop -> [[Card]]
 possibleOpponentPockets p com = possiblePockets
   where restDeck = without (unpackN p ++ unpackN com) deck
-        possiblePockets = P.subsequencesN 2 restDeck
+        possiblePockets = subsequencesN 2 restDeck
 
 possibleOpponentHands :: Pocket -> CommunityFlop -> [P.HandCategory]
 possibleOpponentHands p com = sort

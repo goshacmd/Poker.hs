@@ -4,6 +4,7 @@ import Cards
 import Utils
 import Data.Function
 import Data.List
+import Data.List.Subs
 import Data.Tuple.Curry
 import Data.Tuple.Pack
 import Data.Maybe
@@ -109,14 +110,6 @@ s_fh = makeHand [(Diamonds, Two), (Spades, Two), (Hearts, Two), (Clubs, King), (
 s_s  = makeHand [(Diamonds, Three), (Spades, Three), (Spades, Four), (Clubs, Three), (Hearts, Three)]
 
 -- Util
-
-subsequencesN :: Int -> [a] -> [[a]]
-subsequencesN n xs = let l = length xs
-                          in if n>l then [] else subsequencesBySize xs !! (l-n)
- where
-   subsequencesBySize [] = [[[]]]
-   subsequencesBySize (x:xs) = let next = subsequencesBySize xs
-                             in zipWith (++) ([]:next) (map (map (x:)) next ++ [[]])
 
 listToHand :: [Card] -> Hand
 listToHand = packN
