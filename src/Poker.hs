@@ -9,6 +9,7 @@ import Data.Tuple.Curry
 import Data.Tuple.Pack
 import Data.Maybe
 import Control.Applicative
+import Control.Monad
 import Control.Arrow
 
 type Hand = (Card, Card, Card, Card, Card)
@@ -178,8 +179,7 @@ oneFullHouse :: Hand -> Maybe (Face, Face)
 oneFullHouse h = f (maybeHead p) (maybeHead t)
   where p = exactlyPairs h
         t = exactlyTriplets h
-        f (Just pp) (Just tt) = Just (pp, tt)
-        f _ _ = Nothing
+        f a b = pack2 <$> sequence [a, b]
 
 oneSet :: Hand -> Maybe (Face, Kicker)
 oneSet = maybeHead . exactlySets
