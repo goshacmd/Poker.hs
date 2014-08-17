@@ -110,8 +110,13 @@ s_s  = makeHand [(Diamonds, Three), (Spades, Three), (Spades, Four), (Clubs, Thr
 
 -- Util
 
-subsequencesN :: Int -> [Card] -> [[Card]]
-subsequencesN n = filter ((==n) . length) . subsequences
+subsequencesN :: Int -> [a] -> [[a]]
+subsequencesN n xs = let l = length xs
+                          in if n>l then [] else subsequencesBySize xs !! (l-n)
+ where
+   subsequencesBySize [] = [[[]]]
+   subsequencesBySize (x:xs) = let next = subsequencesBySize xs
+                             in zipWith (++) ([]:next) (map (map (x:)) next ++ [[]])
 
 listToHand :: [Card] -> Hand
 listToHand = packN
