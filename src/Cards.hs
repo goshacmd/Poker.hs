@@ -84,3 +84,6 @@ facedDeck' = filter . fIn face
 
 without :: [Card] -> Deck -> Deck
 without cards deck = deck \\ cards
+
+deckWithout :: [Card] -> Deck
+deckWithout = (\\) deck

@@ -36,10 +36,9 @@ evalPocket _ = Junk
 
 outs :: [Card] -> [Card]
 outs xs = sort . nub. map snd
-        . filter ((>P.bestRank xs) . P.rank . fst)
-        . map (P.bestIn &&& addedCard)
+        . filter ((> P.bestRank xs) . P.rank . fst)
+        . map (P.bestIn &&& head . (\\ xs))
         . possibleHands $ xs
-  where addedCard = head . (\\ xs)
 
 -- Util
 
@@ -47,25 +46,25 @@ possibleHands :: [Card] -> [[Card]]
 possibleHands xs = flip (:) <$> subsequencesN 4 xs <*> without xs deck
 
 possibleOpponentPockets :: Pocket -> Board -> [[Card]]
-possibleOpponentPockets p com = possiblePockets
-  where restDeck = without (unpackN p ++ cards com) deck
-        possiblePockets = subsequencesN 2 restDeck
+possibleOpponentPockets p = subsequencesN 2 . deckWithout . allCards p
 
 possibleOpponentHands :: Pocket -> Board -> [P.HandCategory]
 possibleOpponentHands p com = sort
                             . nub
-                            . map (P.bestIn . sort . (++c))
+                            . map (P.bestIn . sort . (++ cards com))
                             . possibleOpponentPockets p $ com
-  where c = cards com
 
 betterOpponentHands :: Pocket -> Board -> [P.HandCategory]
-betterOpponentHands p com = filter (>ownBest) $ possibleOpponentHands p com
-  where ownBest = P.bestIn $ unpackN p ++ cards com
+betterOpponentHands p com = filter ((>) $ P.bestIn $ allCards p com)
+                          $ possibleOpponentHands p com
 
 cards :: Board -> [Card]
 cards (Flop a b c) = [a, b, c]
 cards (Turn a b c d) = [a, b, c, d]
 cards (River a b c d e) = [a, b, c, d, e]
+
+allCards :: Pocket -> Board -> [Card]
+allCards p com = unpackN p ++ cards com
 
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
@@ -99,7 +98,4 @@ suited :: Pocket -> Bool
 suited (a, b) = suit a == suit b
 
 connected :: Pocket -> Bool
-connected = (==1) . gap
-
-gap :: Pocket -> Int
-gap = abs . foldr (-) 0 . map (fromEnum . face) . sort . unpackN
+connected = consec . map face . unpackN

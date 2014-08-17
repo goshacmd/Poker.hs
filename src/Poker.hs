@@ -126,8 +126,8 @@ lastCard (_, _, _, _, a) = a
 sortHandByFace :: Hand -> Hand
 sortHandByFace = listToHand . handToList
 
-consec :: Hand -> Bool
-consec = consec' . map face . handToList
+consecH :: Hand -> Bool
+consecH = consec . map face . handToList
 
 groups :: [Card] -> [(Face, Int)]
 groups = map (head &&& length)
@@ -200,5 +200,5 @@ allSuitsSame :: Hand -> Bool
 allSuitsSame h = (==1) $ length $ allSuits h
 
 isFlush = allSuitsSame
-isStraight = consec
+isStraight = consecH
 isStraightFlush h = isStraight h && isFlush h
