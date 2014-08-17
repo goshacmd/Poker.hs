@@ -16,6 +16,8 @@ data Board = Flop  Card Card Card
            | River Card Card Card Card Card
            deriving (Show)
 
+type PocketBoard = (Pocket, Board)
+
 data PocketCategory = Premium1 -- AA, KK
                     | Premium2 -- QQ, JJ, AK (suited)
                     | Premium3 -- TT, AK, AQ, AJ, KQ
@@ -45,26 +47,33 @@ outs xs = sort . nub. map snd
 possibleHands :: [Card] -> [[Card]]
 possibleHands = joinTup (:) . (deckWithout &&& subsequencesN 4)
 
-possibleOpponentPockets :: Pocket -> Board -> [[Card]]
-possibleOpponentPockets p = subsequencesN 2 . deckWithout . allCards p
+possibleOpponentPockets :: [Card] -> [[Card]]
+possibleOpponentPockets = subsequencesN 2 . deckWithout
 
-possibleOpponentHands :: Pocket -> Board -> [P.HandCategory]
-possibleOpponentHands p com = sort
-                            . nub
-                            . map (P.bestIn . sort . (++ cards com))
-                            . possibleOpponentPockets p $ com
+possibleOpponentHands :: PocketBoard -> [P.HandCategory]
+possibleOpponentHands = sort . nub
+                      . app
+                      . first (map . (P.bestIn . sort $$ (++)))
+                      . (boardCards &&& possibleOpponentPockets . allCards)
 
-betterOpponentHands :: Pocket -> Board -> [P.HandCategory]
-betterOpponentHands p com = filter ((>) $ P.bestIn $ allCards p com)
-                          $ possibleOpponentHands p com
+betterOpponentHands :: PocketBoard -> [P.HandCategory]
+betterOpponentHands = app
+                    . first (filter. (<))
+                    . (P.bestIn . allCards &&& possibleOpponentHands)
 
 cards :: Board -> [Card]
 cards (Flop a b c) = [a, b, c]
 cards (Turn a b c d) = [a, b, c, d]
 cards (River a b c d e) = [a, b, c, d, e]
 
-allCards :: Pocket -> Board -> [Card]
-allCards p com = unpackN p ++ cards com
+pocketCards :: PocketBoard -> [Card]
+pocketCards = unpackN . fst
+
+boardCards :: PocketBoard -> [Card]
+boardCards = cards . snd
+
+allCards :: PocketBoard -> [Card]
+allCards (p, b) = unpackN p ++ cards b
 
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]

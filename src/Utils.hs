@@ -47,3 +47,8 @@ maybeList Nothing  = []
 maybeHead :: [a] -> Maybe a
 maybeHead (a:_) = Just a
 maybeHead []    = Nothing
+
+-- Double dot.
+infixr 8 $$
+($$) :: (c -> e) -> (a -> b -> c) -> a -> b -> e
+($$) f1 f2 x = f1 . f2 x
