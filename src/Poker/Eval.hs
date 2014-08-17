@@ -65,15 +65,13 @@ possibleOpponentPockets :: [Card] -> [[Card]]
 possibleOpponentPockets = subsequencesN 2 . deckWithout
 
 possibleOpponentHands :: PocketBoard -> [P.HandCategory]
-possibleOpponentHands = sort . nub
-                      . app
-                      . first (map . (P.bestIn . sort $$ (++)))
-                      . (boardCards &&& possibleOpponentPockets . allCards)
+possibleOpponentHands = boardCards &&& possibleOpponentPockets . allCards
+                      >>> first (map . (P.bestIn . sort $$ (++)))
+                      >>> app >>> nub >>> sort
 
 betterOpponentHands :: PocketBoard -> [P.HandCategory]
-betterOpponentHands = app
-                    . first (filter. (<))
-                    . (P.bestIn . allCards &&& possibleOpponentHands)
+betterOpponentHands = P.bestIn . allCards &&& possibleOpponentHands
+                    >>> first (filter . (<)) >>> app
 
 cards :: Board -> [Card]
 cards (Flop a b c) = [a, b, c]
