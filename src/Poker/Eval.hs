@@ -1,9 +1,9 @@
-module Poker.Eval
-  where
+module Poker.Eval where
 
 import Cards
 import qualified Poker as P
 import Utils
+import Data.Tuple.Pack
 import Data.List
 import Control.Applicative
 import Control.Arrow
@@ -76,4 +76,4 @@ connected :: Pocket -> Bool
 connected = (==1) . gap
 
 gap :: Pocket -> Int
-gap = abs . foldr (-) 0 . map (fromEnum . face) . sort . untuplify2
+gap = abs . foldr (-) 0 . map (fromEnum . face) . sort . unpackN

@@ -1,11 +1,11 @@
-module Poker
-  where
+module Poker where
 
 import Cards
 import Utils
 import Data.Function
 import Data.List
 import Data.Tuple.Curry
+import Data.Tuple.Pack
 import Data.Maybe
 import Control.Applicative
 import Control.Arrow
@@ -42,7 +42,7 @@ rank StraightFlush{} = StraightFlushR
 -- Hand category detection
 
 highCard :: Hand -> HandCategory
-highCard = uncurryN HighCard . tuplify5 . reverse . highFaces
+highCard = uncurryN HighCard . pack5 . reverse . highFaces
 
 onePair :: Hand -> [HandCategory]
 onePair = map (uncurryN OnePair) . pairsWithKickers
@@ -114,10 +114,10 @@ subsequencesN :: Int -> [Card] -> [[Card]]
 subsequencesN n = filter ((==n) . length) . subsequences
 
 listToHand :: [Card] -> Hand
-listToHand = tuplify5
+listToHand = packN
 
 handToList :: Hand -> [Card]
-handToList = sort . untuplify5
+handToList = sort . unpackN
 
 makeHand :: [(Suit, Face)] -> Hand
 makeHand = listToHand . map (uncurry Card)
@@ -148,7 +148,7 @@ groupsWithCount :: (Int -> Bool) -> Hand -> [Face]
 groupsWithCount f = map fst . filter (f . snd) . groups . handToList
 
 pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
-pairsWithKickers = map tuplify4 . groupsWithKickers 2
+pairsWithKickers = map packN . groupsWithKickers 2
 
 pairs :: [Card] -> [Face]
 pairs = map fst . groups
@@ -159,13 +159,13 @@ doublePairs h = map withKicker . doublePairs' . handToList $ h
         withKicker (x, y) = (x, y, head $ fs \\ [x, y])
 
 doublePairs' :: [Card] -> [(Face, Face)]
-doublePairs' = map tuplify2 . filter ((==2) . length) . subsequences . pairs
+doublePairs' = map packN . filter ((==2) . length) . subsequences . pairs
 
 triplets :: Hand -> [Face]
 triplets = groupsWithCount (>=3)
 
 tripletsWithKickers :: Hand -> [(Face, Kicker, Kicker)]
-tripletsWithKickers = map tuplify3 . groupsWithKickers 3
+tripletsWithKickers = map packN . groupsWithKickers 3
 
 exactlyPairs :: Hand -> [Face]
 exactlyPairs = groupsWithCount (==2)
@@ -174,7 +174,7 @@ exactlyTriplets :: Hand -> [Face]
 exactlyTriplets = groupsWithCount (==3)
 
 exactlySets :: Hand -> [(Face, Kicker)]
-exactlySets = map tuplify2 . groupsWithKickers 4
+exactlySets = map packN . groupsWithKickers 4
 
 oneFullHouse :: Hand -> Maybe (Face, Face)
 oneFullHouse h = f (maybeHead p) (maybeHead t)

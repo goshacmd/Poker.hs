@@ -1,7 +1,7 @@
-module Cards
-  where
+module Cards where
 
 import Utils
+import Data.Tuple.Pack
 import Data.Function
 import Data.List
 import Data.List.Split
@@ -69,7 +69,7 @@ readCard :: (Char, Char) -> Card
 readCard (f, s) = Card (readSuit s) (readFace f)
 
 readCards :: String -> [Card]
-readCards = map (readCard . tuplify2) . splitOn " "
+readCards = map (readCard . packN) . splitOn " "
 
 deck :: Deck
 deck = Card <$> [minBound..maxBound] <*> [minBound..maxBound]
