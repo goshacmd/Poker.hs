@@ -4,6 +4,7 @@ import Cards
 import Utils
 import Data.Function
 import Data.List
+import Data.List.Grouping
 import Data.List.Subs
 import Data.Tuple.Curry
 import Data.Tuple.Pack
@@ -47,13 +48,13 @@ highCard :: Hand -> HandCategory
 highCard = uncurryN HighCard . pack5 . reverse . highFaces
 
 onePair :: Hand -> [HandCategory]
-onePair = map (uncurryN OnePair) . pairsWithKickers
+onePair = map (uncurryN OnePair) . pairsWithKickers . handToList
 
 twoPair :: Hand -> [HandCategory]
 twoPair = map (uncurryN TwoPair) . doublePairs
 
 threeOfAKind :: Hand -> [HandCategory]
-threeOfAKind = map (uncurryN ThreeOfAKind) . tripletsWithKickers
+threeOfAKind = map (uncurryN ThreeOfAKind) . tripletsWithKickers . handToList
 
 straight :: Hand -> Maybe HandCategory
 straight h | isStraight h = return . Straight $ highFace h
@@ -102,14 +103,6 @@ bestRank = rank . bestIn
 winningHand :: [Hand] -> (Hand, HandCategory)
 winningHand = maximumBy (on compare snd) . map (tupF bestHandCategory)
 
--- Sample hands
-
-s_hc = makeHand [(Spades, Ace), (Diamonds, Jack), (Diamonds, Seven), (Hearts, Three), (Spades, Queen)]
-s_sf = makeHand [(Hearts, Three), (Hearts, Four), (Hearts, Five), (Hearts, Six), (Hearts, Seven), (Hearts, Eight)]
-s_p  = makeHand [(Diamonds, Five), (Spades, Five), (Hearts, Seven), (Spades, Queen), (Clubs, Ace)]
-s_fh = makeHand [(Diamonds, Two), (Spades, Two), (Hearts, Two), (Clubs, King), (Hearts, King)]
-s_s  = makeHand [(Diamonds, Three), (Spades, Three), (Spades, Four), (Clubs, Three), (Hearts, Three)]
-
 -- Util
 
 listToHand :: [Card] -> Hand
@@ -131,23 +124,19 @@ consecH :: Hand -> Bool
 consecH = consec . map face . handToList
 
 groups :: [Card] -> [(Face, Int)]
-groups = map (head &&& length)
+groups = map (face . head &&& length)
        . filter ((>1) . length)
-       . group
-       . map face
+       . groupedBy face
 
-groupsWithKickers :: Int -> Hand -> [[Face]]
-groupsWithKickers n h = map (joinF rem . head)
-                      . filter ((>=n) . length)
-                      $ group fs
-  where fs = map face $ handToList h
-        rem = sortBy (flip compare) . flip (rep n . delete) fs
+groupsWithKickers :: Int -> [Card] -> [(Face, [Kicker])]
+groupsWithKickers n = map ((face . head) *** map face)
+                    . sizedGroupsWithRest face n
 
-groupsWithCount :: (Int -> Bool) -> Hand -> [Face]
-groupsWithCount f = map fst . filter (f . snd) . groups . handToList
+groupsWithCount :: (Int -> Bool) -> [Card] -> [Face]
+groupsWithCount f = map fst . filter (f . snd) . groups
 
-pairsWithKickers :: Hand -> [(Face, Kicker, Kicker, Kicker)]
-pairsWithKickers = map packN . groupsWithKickers 2
+pairsWithKickers :: [Card] -> [(Face, Kicker, Kicker, Kicker)]
+pairsWithKickers = map (packN . joinTup (:)) . groupsWithKickers 2
 
 pairs :: [Card] -> [Face]
 pairs = map fst . groups
@@ -160,29 +149,26 @@ doublePairs h = map withKicker . doublePairs' . handToList $ h
 doublePairs' :: [Card] -> [(Face, Face)]
 doublePairs' = map packN . filter ((==2) . length) . subsequences . pairs
 
-triplets :: Hand -> [Face]
-triplets = groupsWithCount (>=3)
+tripletsWithKickers :: [Card] -> [(Face, Kicker, Kicker)]
+tripletsWithKickers = map (packN . joinTup (:)) . groupsWithKickers 3
 
-tripletsWithKickers :: Hand -> [(Face, Kicker, Kicker)]
-tripletsWithKickers = map packN . groupsWithKickers 3
-
-exactlyPairs :: Hand -> [Face]
+exactlyPairs :: [Card] -> [Face]
 exactlyPairs = groupsWithCount (==2)
 
-exactlyTriplets :: Hand -> [Face]
+exactlyTriplets :: [Card] -> [Face]
 exactlyTriplets = groupsWithCount (==3)
 
-exactlySets :: Hand -> [(Face, Kicker)]
-exactlySets = map packN . groupsWithKickers 4
+exactlySets :: [Card] -> [(Face, Kicker)]
+exactlySets = map (packN . joinTup (:)) . groupsWithKickers 4
 
 oneFullHouse :: Hand -> Maybe (Face, Face)
 oneFullHouse h = f (maybeHead p) (maybeHead t)
-  where p = exactlyPairs h
-        t = exactlyTriplets h
+  where p = exactlyPairs $ handToList h
+        t = exactlyTriplets $ handToList h
         f a b = pack2 <$> sequence [a, b]
 
 oneSet :: Hand -> Maybe (Face, Kicker)
-oneSet = maybeHead . exactlySets
+oneSet = maybeHead . exactlySets . handToList
 
 highFaces :: Hand -> [Face]
 highFaces = map face . handToList
@@ -191,13 +177,13 @@ highFace :: Hand -> Face
 highFace = last . highFaces
 
 allSuits :: Hand -> [Suit]
-allSuits h = nub $ map suit $ handToList h
+allSuits = nub . map suit . handToList
 
 oneSuit :: Hand -> Suit
 oneSuit = head . allSuits
 
 allSuitsSame :: Hand -> Bool
-allSuitsSame h = (==1) $ length $ allSuits h
+allSuitsSame = (==1) . length . allSuits
 
 isFlush = allSuitsSame
 isStraight = consecH

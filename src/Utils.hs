@@ -34,10 +34,6 @@ fEq f val = (== val) . f
 fIn :: Eq b => (a -> b) -> [b] -> (a -> Bool)
 fIn f vals = flip elem vals . f
 
--- Sort and group elements based on return value of f.
-groupedBy :: Ord b => (a -> b) -> [a] -> [[a]]
-groupedBy f = groupBy (on (==) f) . sortBy (on compare f)
-
 -- Convert a Maybe List to List.
 maybeList :: Maybe [a] -> [a]
 maybeList (Just a) = a

@@ -22,7 +22,7 @@ library
     Poker.Eval
     CLI
 
-  other-modules: Utils, Data.List.Subs, Data.Tuple.Pack
+  other-modules: Utils, Data.List.Grouping, Data.List.Subs, Data.Tuple.Pack
 
   -- other-modules:
   -- default-extensions:  MultiParamTypeClasses, FlexibleInstances, FunctionalDependencies
