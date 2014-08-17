@@ -28,13 +28,27 @@ data PocketCategory = Premium1 -- AA, KK
                     deriving (Show)
 
 evalPocket :: Pocket -> PocketCategory
-evalPocket h | premium1 h        = Premium1
-evalPocket h | premium2 h        = Premium2
-evalPocket h | premium3 h        = Premium3
-evalPocket h | suitedConnected h = SuitedConnected
-evalPocket h | suited h          = Suited
-evalPocket h | connected h       = Connected
-evalPocket _                     = Junk
+evalPocket p = ep (faces p) (suited p)
+
+aa = [Ace, Ace]
+kk = [King, King]
+qq = [Queen, Queen]
+jj = [Jack, Jack]
+tt = [Ten, Ten]
+ak = [Ace, King]
+aq = [Ace, Queen]
+aj = [Ace, Jack]
+kq = [King, Queen]
+
+ep :: [Face] -> Bool -> PocketCategory
+ep f _    | f `elem` [aa, kk]             = Premium1
+ep f _    | f `elem` [qq, jj]             = Premium2
+ep f True | f == ak                       = Premium2
+ep f _    | f `elem` [tt, ak, aq, aj, kq] = Premium3
+ep f True | consec f                      = SuitedConnected
+ep _ True                                 = Suited
+ep f _    | consec f                      = Connected
+ep _ _                                    = Junk
 
 outs :: [Card] -> [Card]
 outs xs = sort . nub. map snd
@@ -78,33 +92,5 @@ allCards (p, b) = unpackN p ++ cards b
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
 
-premium1 :: Pocket -> Bool
-premium1 = premium1' . faces
-
-premium2 :: Pocket -> Bool
-premium2 h = premium2' (sort $ faces h) (suited h)
-
-premium3 :: Pocket -> Bool
-premium3 = premium3' . sort . faces
-
-premium1' :: [Face] -> Bool
-premium1' fs = fs == [Ace, Ace] || fs == [King, King]
-
-premium2' :: [Face] -> Bool -> Bool
-
-premium2' fs suited = fs == [Queen, Queen] || fs == [Jack, Jack] || (suited && fs == [King, Ace])
-
-premium3' :: [Face] -> Bool
-premium3' fs = fs `elem` [[Ten, Ten], [King, Ace], [Queen, Ace], [Jack, Ace], [Queen, King]]
-
-pair :: Pocket -> Bool
-pair (a, b) = face a == face b
-
-suitedConnected :: Pocket -> Bool
-suitedConnected h = suited h && connected h
-
 suited :: Pocket -> Bool
 suited (a, b) = suit a == suit b
-
-connected :: Pocket -> Bool
-connected = consec . map face . unpackN
