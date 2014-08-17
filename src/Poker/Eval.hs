@@ -11,7 +11,10 @@ import Control.Arrow
 
 type Pocket = (Card, Card) -- Starting hand
 
-type CommunityFlop = (Card, Card, Card)
+data Board = Flop  Card Card Card
+           | Turn  Card Card Card Card
+           | River Card Card Card Card Card
+           deriving (Show)
 
 data PocketCategory = Premium1 -- AA, KK
                     | Premium2 -- QQ, JJ, AK (suited)
@@ -43,21 +46,26 @@ outs xs = sort . nub. map snd
 possibleHands :: [Card] -> [[Card]]
 possibleHands xs = flip (:) <$> subsequencesN 4 xs <*> without xs deck
 
-possibleOpponentPockets :: Pocket -> CommunityFlop -> [[Card]]
+possibleOpponentPockets :: Pocket -> Board -> [[Card]]
 possibleOpponentPockets p com = possiblePockets
-  where restDeck = without (unpackN p ++ unpackN com) deck
+  where restDeck = without (unpackN p ++ cards com) deck
         possiblePockets = subsequencesN 2 restDeck
 
-possibleOpponentHands :: Pocket -> CommunityFlop -> [P.HandCategory]
+possibleOpponentHands :: Pocket -> Board -> [P.HandCategory]
 possibleOpponentHands p com = sort
                             . nub
                             . map (P.bestIn . sort . (++c))
                             . possibleOpponentPockets p $ com
-  where c = unpackN com
+  where c = cards com
 
-betterOpponentHands :: Pocket -> CommunityFlop -> [P.HandCategory]
+betterOpponentHands :: Pocket -> Board -> [P.HandCategory]
 betterOpponentHands p com = filter (>ownBest) $ possibleOpponentHands p com
-  where ownBest = P.bestIn $ unpackN p ++ unpackN com
+  where ownBest = P.bestIn $ unpackN p ++ cards com
+
+cards :: Board -> [Card]
+cards (Flop a b c) = [a, b, c]
+cards (Turn a b c d) = [a, b, c, d]
+cards (River a b c d e) = [a, b, c, d, e]
 
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
@@ -75,6 +83,7 @@ premium1' :: [Face] -> Bool
 premium1' fs = fs == [Ace, Ace] || fs == [King, King]
 
 premium2' :: [Face] -> Bool -> Bool
+
 premium2' fs suited = fs == [Queen, Queen] || fs == [Jack, Jack] || (suited && fs == [King, Ace])
 
 premium3' :: [Face] -> Bool
