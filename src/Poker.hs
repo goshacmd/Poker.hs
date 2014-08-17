@@ -85,8 +85,17 @@ matches h = sort . concat $
     maybeToList . straightFlush
   ] <*> [h]
 
+matchesIn :: [Card] -> [HandCategory]
+matchesIn = concatMap (matches . listToHand) . subsequencesN 5
+
 bestHandCategory :: Hand -> HandCategory
 bestHandCategory = maximum . matches
+
+bestIn :: [Card] -> HandCategory
+bestIn = maximum . matchesIn
+
+bestRank :: [Card] -> HandRank
+bestRank = rank . bestIn
 
 winningHand :: [Hand] -> (Hand, HandCategory)
 winningHand = maximumBy (on compare snd) . map (tupF bestHandCategory)
@@ -100,6 +109,9 @@ s_fh = makeHand [(Diamonds, Two), (Spades, Two), (Hearts, Two), (Clubs, King), (
 s_s  = makeHand [(Diamonds, Three), (Spades, Three), (Spades, Four), (Clubs, Three), (Hearts, Three)]
 
 -- Util
+
+subsequencesN :: Int -> [Card] -> [[Card]]
+subsequencesN n = filter ((==n) . length) . subsequences
 
 listToHand :: [Card] -> Hand
 listToHand = tuplify5

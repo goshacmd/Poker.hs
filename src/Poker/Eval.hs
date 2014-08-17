@@ -6,6 +6,7 @@ import qualified Poker as P
 import Utils
 import Data.List
 import Control.Applicative
+import Control.Arrow
 
 type Pocket = (Card, Card) -- Starting hand
 
@@ -30,30 +31,16 @@ evalPocket h | connected h = Connected
 evalPocket _ = Junk
 
 outs :: [Card] -> [Card]
-outs xs = sort bestCards
-  where additionalCards = without xs deck
-        curr = filter ((==5) . length) $ subsequences xs
-        bestCurr = P.rank $ maximum $ map (P.bestHandCategory . P.listToHand) curr
-        subs = filter ((==4) . length) $ subsequences xs
-        possibleHands = flip (:) <$> subs <*> additionalCards
-        zip h = (P.bestHandCategory $ P.listToHand h, head $ h \\ xs)
-        possibleCategories = map zip possibleHands
-        bestPossible = filter ((>bestCurr) . P.rank .fst) possibleCategories
-        bestCards = nub $ map snd bestPossible
+outs xs = sort . nub. map snd
+        . filter ((>P.bestRank xs) . P.rank . fst)
+        . map (P.bestIn &&& addedCard)
+        . possibleHands $ xs
+  where addedCard = head . (\\ xs)
 
 -- Util
 
-type FlushDraw = ([Card], Suit)
-
-flushDraw :: [Card] -> Maybe FlushDraw
-flushDraw = maybeHead . flushDraws
-
-outsForFlushDraw :: FlushDraw -> [Card]
-outsForFlushDraw (cards, suit) = without cards $ suitedDeck suit deck
-
-flushDraws :: [Card] -> [([Card], Suit)]
-flushDraws = map withSuit . filter (fEq length 4) . groupedBy suit
-  where withSuit cards@(a:_) = (cards, suit a)
+possibleHands :: [Card] -> [[Card]]
+possibleHands xs = flip (:) <$> P.subsequencesN 4 xs <*> without xs deck
 
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
