@@ -15,8 +15,7 @@ data Card = Card { suit :: Suit, face :: Face }
 data Suit = Hearts | Diamonds | Clubs | Spades
           deriving (Show, Eq, Enum, Bounded)
 
-data Face = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten
-             | Jack | Queen | King | Ace
+data Face = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace
           deriving (Eq, Ord, Enum, Bounded)
 
 instance Ord Card where
@@ -71,7 +70,7 @@ readCards :: [String] -> [Card]
 readCards = map (readCard . packN)
 
 deck :: Deck
-deck = Card <$> [minBound..maxBound] <*> [minBound..maxBound]
+deck = Card <$> bounds <*> bounds
 
 suitedDeck :: Suit -> Deck -> Deck
 suitedDeck = filter . fEq suit

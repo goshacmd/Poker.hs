@@ -52,3 +52,6 @@ maybeHead []    = Nothing
 infixr 8 $$
 ($$) :: (c -> e) -> (a -> b -> c) -> a -> b -> e
 ($$) f1 f2 x = f1 . f2 x
+
+bounds :: (Enum a, Bounded a) => [a]
+bounds = [minBound..maxBound]
