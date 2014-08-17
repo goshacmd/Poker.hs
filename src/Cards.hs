@@ -4,7 +4,6 @@ import Utils
 import Data.Tuple.Pack
 import Data.Function
 import Data.List
-import Data.List.Split
 import Data.Ord
 import Control.Applicative
 
@@ -68,8 +67,8 @@ readFace 'A' = Ace
 readCard :: (Char, Char) -> Card
 readCard (f, s) = Card (readSuit s) (readFace f)
 
-readCards :: String -> [Card]
-readCards = map (readCard . packN) . splitOn " "
+readCards :: [String] -> [Card]
+readCards = map (readCard . packN)
 
 deck :: Deck
 deck = Card <$> [minBound..maxBound] <*> [minBound..maxBound]

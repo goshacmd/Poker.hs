@@ -15,9 +15,29 @@ extra-source-files:  README.md
 cabal-version:       >=1.10
 
 library
-  hs-source-dirs:      src
-  exposed-modules:     Cards, Poker, Poker.Eval
+  hs-source-dirs: src
+  exposed-modules:
+    Cards
+    Poker
+    Poker.Eval
+    CLI
+
+  other-modules: Utils, Data.Tuple.Pack
+
   -- other-modules:
   -- default-extensions:  MultiParamTypeClasses, FlexibleInstances, FunctionalDependencies
-  build-depends:       base >=4.7 && <4.8, tuple >=0.2 && <0.3, split >=0.2 && <0.3
-  default-language:    Haskell2010
+  build-depends:
+    base >=4.7 && <4.8,
+    tuple >=0.2 && <0.3
+
+  default-language: Haskell2010
+
+executable pkre
+  hs-source-dirs: cli
+  main-is: Main.hs
+
+  build-depends:
+    base >=4.7 && <4.8,
+    poker >= 0.1
+
+  default-language: Haskell2010
