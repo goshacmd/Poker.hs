@@ -3,9 +3,10 @@ module Poker.Eval where
 import Cards
 import qualified Poker as P
 import Utils
-import Data.List
-import Data.List.Subs
-import Data.Tuple.Pack
+import Data.List (sort, nub, (\\))
+import Data.List.Subs (subsequencesN)
+import Data.Tuple.Pack (unpackN)
+import Data.Function (on)
 import Control.Applicative
 import Control.Arrow
 
@@ -91,4 +92,4 @@ faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
 
 suited :: Pocket -> Bool
-suited (a, b) = suit a == suit b
+suited = uncurry $ on (==) suit

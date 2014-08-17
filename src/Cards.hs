@@ -1,10 +1,9 @@
 module Cards where
 
 import Utils
-import Data.Tuple.Pack
-import Data.Function
-import Data.List
-import Data.Ord
+import Data.Tuple.Pack (packN)
+import Data.Function (on)
+import Data.List ((\\))
 import Control.Applicative
 
 type Deck = [Card]

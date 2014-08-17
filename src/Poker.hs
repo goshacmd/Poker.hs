@@ -2,13 +2,13 @@ module Poker where
 
 import Cards
 import Utils
-import Data.Function
-import Data.List
-import Data.List.Grouping
-import Data.List.Subs
-import Data.Tuple.Curry
-import Data.Tuple.Pack
-import Data.Maybe
+import Data.Function (on)
+import Data.List (sort, maximumBy, subsequences, nub, (\\))
+import Data.List.Grouping (groupedBy, sizedGroupsWithRest)
+import Data.List.Subs (subsequencesN)
+import Data.Tuple.Curry (uncurryN)
+import Data.Tuple.Pack (pack2, pack5, packN, unpackN)
+import Data.Maybe (maybeToList)
 import Control.Applicative
 import Control.Monad
 import Control.Arrow
