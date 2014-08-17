@@ -26,13 +26,13 @@ data PocketCategory = Premium1 -- AA, KK
                     deriving (Show)
 
 evalPocket :: Pocket -> PocketCategory
-evalPocket h | premium1 h = Premium1
-evalPocket h | premium2 h = Premium2
-evalPocket h | premium3 h = Premium3
+evalPocket h | premium1 h        = Premium1
+evalPocket h | premium2 h        = Premium2
+evalPocket h | premium3 h        = Premium3
 evalPocket h | suitedConnected h = SuitedConnected
-evalPocket h | suited h = Suited
-evalPocket h | connected h = Connected
-evalPocket _ = Junk
+evalPocket h | suited h          = Suited
+evalPocket h | connected h       = Connected
+evalPocket _                     = Junk
 
 outs :: [Card] -> [Card]
 outs xs = sort . nub. map snd
@@ -43,7 +43,7 @@ outs xs = sort . nub. map snd
 -- Util
 
 possibleHands :: [Card] -> [[Card]]
-possibleHands xs = flip (:) <$> subsequencesN 4 xs <*> without xs deck
+possibleHands = joinTup (:) . (deckWithout &&& subsequencesN 4)
 
 possibleOpponentPockets :: Pocket -> Board -> [[Card]]
 possibleOpponentPockets p = subsequencesN 2 . deckWithout . allCards p

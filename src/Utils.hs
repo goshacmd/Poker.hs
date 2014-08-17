@@ -22,6 +22,10 @@ joinF f x = x : f x
 tupF :: (a -> b) -> a -> (a, b)
 tupF f x = (x, f x)
 
+-- Given a tuple (a, b) and f :: a -> b -> c, get c.
+joinTup :: (a -> b -> c) -> (a, b) -> c
+joinTup f (a, b) = f a b
+
 -- Check whether f x equals val.
 fEq :: Eq b => (a -> b) -> b -> (a -> Bool)
 fEq f val = (== val) . f
