@@ -42,6 +42,15 @@ outs xs = sort . nub. map snd
 possibleHands :: [Card] -> [[Card]]
 possibleHands xs = flip (:) <$> P.subsequencesN 4 xs <*> without xs deck
 
+possibleOpponentPockets :: Pocket -> CommunityFlop -> [[Card]]
+possibleOpponentPockets p com = possiblePockets
+  where restDeck = without (unpackN p ++ unpackN com) deck
+        possiblePockets = P.subsequencesN 2 restDeck
+
+possibleOpponentHands :: Pocket -> CommunityFlop -> [[Card]]
+possibleOpponentHands p com = map (sort . (++c)) $ possibleOpponentPockets p com
+  where c = unpackN com
+
 faces :: Pocket -> [Face]
 faces (a, b) = [face a, face b]
 
