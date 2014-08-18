@@ -66,13 +66,16 @@ possibleOpponentPockets :: [Card] -> [[Card]]
 possibleOpponentPockets = subsequencesN 2 . deckWithout
 
 possibleOpponentHands :: PocketBoard -> [P.HandCategory]
-possibleOpponentHands = boardCards &&& possibleOpponentPockets . allCards
-                      >>> first (map . (P.bestIn . sort $$ (++)))
-                      >>> app >>> nub >>> sort
+possibleOpponentHands = do
+  board <- boardCards
+  poc <- possibleOpponentPockets . allCards
+  return . sort . nub . map (P.bestIn . sort . (++board)) $ poc
 
 betterOpponentHands :: PocketBoard -> [P.HandCategory]
-betterOpponentHands = P.bestIn . allCards &&& possibleOpponentHands
-                    >>> first (filter . (<)) >>> app
+betterOpponentHands = do
+  best <- P.bestIn .allCards
+  poh <- possibleOpponentHands
+  return . filter (>best) $ poh
 
 cards :: Board -> [Card]
 cards (Flop a b c) = [a, b, c]
