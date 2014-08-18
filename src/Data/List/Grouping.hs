@@ -22,5 +22,5 @@ sizedGroupsWithRest f n = map move
                         . filter ((>=n) . length . fst)
                         . groupsWithRest f
   where move (as@(a0:a1), bs) = if length as > n
-                                then move (a1, a0:bs)
+                                then move (a1, sortBy (on compare f) (a0:bs))
                                 else (as, bs)
