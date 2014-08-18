@@ -10,6 +10,16 @@ consec (x:[]) = True
 consec (x:y:zs) | y == succ x = consec $ y:zs
 consec _ = False
 
+-- Check whether n elements of a list are consecutive.
+nConsec :: (Eq a, Enum a) => Int -> [a] -> Bool
+nConsec = nConsec' . sort
+
+nConsec' :: (Eq a, Enum a) => Int -> [a] -> Bool
+nConsec' 0 _      = True
+nConsec' 1 (x:[]) = True
+nConsec' _ (_:[]) = False
+nConsec' n (x:y:zs) = if y == succ x then nConsec (n-1) (y:zs) else nConsec n (y:zs)
+
 -- Repeat function f n times.
 rep :: Int -> (a -> a) -> (a -> a)
 rep 1 f = f

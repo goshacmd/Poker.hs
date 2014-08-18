@@ -51,31 +51,31 @@ onePair :: Hand -> [HandCategory]
 onePair = map (uncurryN OnePair) . pairsWithKickers . handToList
 
 twoPair :: Hand -> [HandCategory]
-twoPair = map (uncurryN TwoPair) . doublePairs
+twoPair = map (uncurryN TwoPair) . doublePairs . handToList
 
 threeOfAKind :: Hand -> [HandCategory]
 threeOfAKind = map (uncurryN ThreeOfAKind) . tripletsWithKickers . handToList
 
 straight :: Hand -> Maybe HandCategory
 straight h | isStraight h = return . Straight $ highFace h
-straight _ = Nothing
+straight _                = Nothing
 
 flush :: Hand -> Maybe HandCategory
 flush h | isFlush h = return $ Flush (oneSuit h) (highFace h)
-flush _ = Nothing
+flush _             = Nothing
 
 fullHouse :: Hand -> Maybe HandCategory
 fullHouse h = uncurryN FullHouse <$> oneFullHouse h
 
-fourOfAKind :: Hand -> Maybe HandCategory
-fourOfAKind h = uncurryN FourOfAKind <$> oneSet h
+fourOfAKind :: Hand -> [HandCategory]
+fourOfAKind = map (uncurryN FourOfAKind) . sets . handToList
 
 straightFlush :: Hand -> Maybe HandCategory
 straightFlush h | isStraightFlush h = return $ StraightFlush (oneSuit h) (highFace h)
-straightFlush _ = Nothing
+straightFlush _                     = Nothing
 
 matches :: Hand -> [HandCategory]
-matches h = sort . concat $
+matches h = sort . concatMap ($ h) $
   [
     return . highCard,
     onePair,
@@ -84,9 +84,9 @@ matches h = sort . concat $
     maybeToList . straight,
     maybeToList . flush,
     maybeToList . fullHouse,
-    maybeToList . fourOfAKind,
+    fourOfAKind,
     maybeToList . straightFlush
-  ] <*> [h]
+  ]
 
 matchesIn :: [Card] -> [HandCategory]
 matchesIn = concatMap (matches . listToHand) . subsequencesN 5
@@ -141,9 +141,9 @@ pairsWithKickers = map (packN . joinTup (:)) . groupsWithKickers 2
 pairs :: [Card] -> [Face]
 pairs = map fst . groups
 
-doublePairs :: Hand -> [(Face, Face, Kicker)]
-doublePairs h = map withKicker . doublePairs' . handToList $ h
-  where fs = map face $ handToList h
+doublePairs :: [Card] -> [(Face, Face, Kicker)]
+doublePairs xs = map withKicker . doublePairs' $ xs
+  where fs = map face xs
         withKicker (x, y) = (x, y, head $ fs \\ [x, y])
 
 doublePairs' :: [Card] -> [(Face, Face)]
@@ -158,8 +158,6 @@ exactlyPairs = groupsWithCount (==2)
 exactlyTriplets :: [Card] -> [Face]
 exactlyTriplets = groupsWithCount (==3)
 
-exactlySets :: [Card] -> [(Face, Kicker)]
-exactlySets = map (packN . joinTup (:)) . groupsWithKickers 4
 
 oneFullHouse :: Hand -> Maybe (Face, Face)
 oneFullHouse h = f (maybeHead p) (maybeHead t)
@@ -167,8 +165,8 @@ oneFullHouse h = f (maybeHead p) (maybeHead t)
         t = exactlyTriplets $ handToList h
         f a b = pack2 <$> sequence [a, b]
 
-oneSet :: Hand -> Maybe (Face, Kicker)
-oneSet = maybeHead . exactlySets . handToList
+sets :: [Card] -> [(Face, Kicker)]
+sets = map (packN . joinTup (:)) . groupsWithKickers 4
 
 highFaces :: Hand -> [Face]
 highFaces = map face . handToList
