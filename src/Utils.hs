@@ -11,10 +11,10 @@ consec (x:y:zs) | y == succ x = consec $ y:zs
 consec _ = False
 
 -- Check whether n elements of a list are consecutive.
-nConsec :: (Eq a, Enum a) => Int -> [a] -> Bool
-nConsec = nConsec' . sort
+nConsec :: (Eq a, Enum a, Ord a) => Int -> [a] -> Bool
+nConsec n = nConsec' n . sort
 
-nConsec' :: (Eq a, Enum a) => Int -> [a] -> Bool
+nConsec' :: (Eq a, Enum a, Ord a) => Int -> [a] -> Bool
 nConsec' 0 _      = True
 nConsec' 1 (x:[]) = True
 nConsec' _ (_:[]) = False

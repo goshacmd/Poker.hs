@@ -65,7 +65,7 @@ flush h | isFlush h = return $ Flush (oneSuit h) (highFace h)
 flush _             = Nothing
 
 fullHouse :: Hand -> Maybe HandCategory
-fullHouse h = uncurryN FullHouse <$> oneFullHouse h
+fullHouse = fmap (uncurryN FullHouse) . oneFullHouse . handToList
 
 fourOfAKind :: Hand -> [HandCategory]
 fourOfAKind = map (uncurryN FourOfAKind) . sets . handToList
@@ -159,10 +159,10 @@ exactlyTriplets :: [Card] -> [Face]
 exactlyTriplets = groupsWithCount (==3)
 
 
-oneFullHouse :: Hand -> Maybe (Face, Face)
-oneFullHouse h = f (maybeHead p) (maybeHead t)
-  where p = exactlyPairs $ handToList h
-        t = exactlyTriplets $ handToList h
+oneFullHouse :: [Card] -> Maybe (Face, Face)
+oneFullHouse xs = f (maybeHead p) (maybeHead t)
+  where p = exactlyPairs xs
+        t = exactlyTriplets xs
         f a b = pack2 <$> sequence [a, b]
 
 sets :: [Card] -> [(Face, Kicker)]
