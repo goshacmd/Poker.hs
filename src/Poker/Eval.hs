@@ -52,10 +52,13 @@ ep f _    | consec f                      = Connected
 ep _ _                                    = Junk
 
 outs :: [Card] -> [Card]
-outs xs = sort . nub. map snd
-        . filter ((> P.bestRank xs) . P.rank . fst)
-        . map (P.bestIn &&& head . (\\ xs))
-        . possibleHands $ xs
+outs = do
+  butXs <- head $$ flip (\\)
+  bestRank <- P.bestRank
+  ph <- possibleHands
+  return . sort . nub . map snd
+         . filter ((>bestRank) . P.rank . fst)
+         . map (P.bestIn &&& butXs) $ ph
 
 -- Util
 
